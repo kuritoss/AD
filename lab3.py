@@ -1,5 +1,6 @@
 from spyre import server
 import pandas as pd
+import matplotlib.pyplot as plt
 
 class SetData(server.App):
     title = "Візуалізація даних"
@@ -16,38 +17,38 @@ class SetData(server.App):
             "action_id": "update_data"
         },
         {
-        "type": 'dropdown',
-        "label": 'Region',
-        "options": [
-            {"label": "Vinnytsya", "value": "1"},
-            {"label": "Volyn", "value": "2"},
-            {"label": "Dnipropetrovs'k", "value": "3"},
-            {"label": "Donets'k", "value": "4"},
-            {"label": "Zhytomyr", "value": "5"},
-            {"label": "Transcarpathia", "value": "6"},
-            {"label": "Zaporizhzhya", "value": "7"},
-            {"label": "Ivano-Frankivs'k", "value": "8"},
-            {"label": "Kiev", "value": "Київська"},
-            {"label": "Kirovohrad", "value": "9"},
-            {"label": "Luhans'k", "value": "10"},
-            {"label": "L'viv", "value": "11"},
-            {"label": "Mykolayiv", "value": "12"},
-            {"label": "Odessa", "value": "13"},
-            {"label": "Poltava", "value": "14"},
-            {"label": "Rivne", "value": "15"},
-            {"label": "Sumy", "value": "16"},
-            {"label": "Ternopil'", "value": "17"},
-            {"label": "Kharkiv", "value": "18"},
-            {"label": "Kherson", "value": "19"},
-            {"label": "Khmel'nyts'kyy", "value": "20"},
-            {"label": "Cherkasy", "value": "21"},
-            {"label": "Chernivtsi", "value": "22"},
-            {"label": "Chernihiv", "value": "23"},
-            {"label": "Crimea", "value": "24"}
-        ],
-        "key": 'region',
-        "action_id": "update_data"
-    },
+            "type": 'dropdown',
+            "label": 'Region',
+            "options": [
+                {"label": "Vinnytsya", "value": "1"},
+                {"label": "Volyn", "value": "2"},
+                {"label": "Dnipropetrovs'k", "value": "3"},
+                {"label": "Donets'k", "value": "4"},
+                {"label": "Zhytomyr", "value": "5"},
+                {"label": "Transcarpathia", "value": "6"},
+                {"label": "Zaporizhzhya", "value": "7"},
+                {"label": "Ivano-Frankivs'k", "value": "8"},
+                {"label": "Kiev", "value": "Київська"},
+                {"label": "Kirovohrad", "value": "9"},
+                {"label": "Luhans'k", "value": "10"},
+                {"label": "L'viv", "value": "11"},
+                {"label": "Mykolayiv", "value": "12"},
+                {"label": "Odessa", "value": "13"},
+                {"label": "Poltava", "value": "14"},
+                {"label": "Rivne", "value": "15"},
+                {"label": "Sumy", "value": "16"},
+                {"label": "Ternopil'", "value": "17"},
+                {"label": "Kharkiv", "value": "18"},
+                {"label": "Kherson", "value": "19"},
+                {"label": "Khmel'nyts'kyy", "value": "20"},
+                {"label": "Cherkasy", "value": "21"},
+                {"label": "Chernivtsi", "value": "22"},
+                {"label": "Chernihiv", "value": "23"},
+                {"label": "Crimea", "value": "24"}
+            ],
+            "key": 'region',
+            "action_id": "update_data"
+        },
         {
             "type": 'text',
             "label": 'Year min',
@@ -127,12 +128,20 @@ class SetData(server.App):
         start_week = int(params['week_min'])
         end_week = int(params['week_max'])
         data = self.getData(params)
-        filtered_data = data[(data['Area'] == region) & (data['Year'] >= year_min) & (data['Year'] <= year_max) & (data['Week'] >= start_week) & (data['Week'] <= end_week)]
-        plt_obj = filtered_data.plot(x='Week', y=ticker)
-        plt_obj.set_ylabel("Значення")
-        plt_obj.set_xlabel("Тиждень")
-        plt_obj.set_title(f"Графік для області {region}  для вказаних тижнів для вказаних років")
-        plot = plt_obj.get_figure()
+
+        plt.figure()
+        
+        for year in range(year_min, year_max + 1):
+            yearly_data = data[(data['Area'] == region) & (data['Year'] == year) & (data['Week'] >= start_week) & (data['Week'] <= end_week)]
+            if not yearly_data.empty:
+                plt.plot(yearly_data['Week'], yearly_data[ticker], label=str(year))
+        
+        plt.xlabel("Тиждень")
+        plt.ylabel("Значення")
+        plt.title(f"Графік для області {region} за роки {year_min}-{year_max}")
+        plt.legend(title='Роки')
+        
+        plot = plt.gcf()
         return plot
 
 if __name__ == '__main__':
