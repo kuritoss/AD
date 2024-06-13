@@ -4,7 +4,6 @@ import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
 
-# Початкові значення параметрів
 initial_amplitude = 1.0
 initial_frequency = 1.0
 initial_phase = 0.0
@@ -16,10 +15,8 @@ previous_noise = None
 previous_noise_mean = None
 previous_noise_covariance = None
 
-# Згенеруємо часовий ряд
 t = np.linspace(0, 10, 1000)
 
-# Фільтр для сигналу
 def my_filter(signal, window_size=5):
     filtered_signal = np.zeros_like(signal)
     half_window = window_size // 2
@@ -31,7 +28,6 @@ def my_filter(signal, window_size=5):
     
     return filtered_signal
 
-# Створення головного вікна
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
@@ -77,7 +73,6 @@ app.layout = html.Div([
 def update_graph(amplitude, frequency, phase, noise_mean, noise_covariance, show_noise):
     global previous_noise, previous_noise_mean, previous_noise_covariance
     
-    # Перевірка, чи параметри шуму змінилися
     if (noise_mean != previous_noise_mean or
         noise_covariance != previous_noise_covariance):
         
@@ -87,13 +82,11 @@ def update_graph(amplitude, frequency, phase, noise_mean, noise_covariance, show
     
     noise = previous_noise if 'show' in show_noise else np.zeros(len(t))
     
-    # Обчислення гармоніки
     y = amplitude * np.sin(2 * np.pi * frequency * t + phase) + noise
     
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=t, y=y, mode='lines', name='Signal with Noise' if 'show' in show_noise else 'Signal'))
     
-    # Додамо графіки сигналу без шуму та відфільтрованого шуму
     if 'show' in show_noise:
         clean_signal = amplitude * np.sin(2 * np.pi * frequency * t + phase)
         fig.add_trace(go.Scatter(x=t, y=clean_signal, mode='lines', name='Clean Signal'))
@@ -123,13 +116,13 @@ def display_selected_graph(graph_type, amplitude, frequency, phase, noise_mean, 
         return generate_filtered_signal_graph(amplitude, frequency, phase, noise_mean, noise_covariance, show_noise)
 
 def generate_filtered_signal_graph(amplitude, frequency, phase, noise_mean, noise_covariance, show_noise):
-    # Фільтруємо шум
+    
     filtered_noise = my_filter(previous_noise)
-    # Отримуємо сигнал без шуму
+    
     clean_signal = amplitude * np.sin(2 * np.pi * frequency * t + phase)
-    # Додаємо до нього відфільтрований шум
+    
     signal_with_filtered_noise = clean_signal + filtered_noise
-    # Побудова графіку
+    
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=t, y=signal_with_filtered_noise, mode='lines', name='Signal with Filtered Noise'))
     return dcc.Graph(figure=fig)
